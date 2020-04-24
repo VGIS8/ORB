@@ -35,5 +35,3 @@ def get_value(test, point, theta_trig, i_center):
     iy = round(p_x * theta_trig[1] + p_y * theta_trig[0])
 
     return i_center + iy + ix
-
-pass
