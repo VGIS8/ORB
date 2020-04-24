@@ -1,29 +1,23 @@
 import cv2 as cv
 import numpy as np
-from matplotlib import pyplot as plt
 import math
 
 
-def pyramid(image, py_image):
+def get_pyramid(image, py_image):
+    """Generate the scale pyramid for the image
+    """
 
     py_image.append(image)
-    py_levels = 0
+    py_levels = 3
 
     for level in range(py_levels):
         image = cv.pyrDown(image)
         py_image.append(image)
 
-def insetSort(data):
-    for place in range(1,len(data)):
-        key = data[place].response
-        compared = place - 1
-        while compared > -1 and data[compared].response < key:
-            data[compared+1].response = data[compared].response
-            compared = compared - 1
-        data[compared+1].response = key 
-    return data
 
 def umax(half_patch_size):
+    """Get a list of line width at different heights of the circle
+    """
     u_max = []
     vmax = math.floor(half_patch_size * math.sqrt(2.00)/2 + 1)
     vmin = math.ceil(half_patch_size * math.sqrt(2.00)/2)
@@ -41,6 +35,9 @@ def umax(half_patch_size):
 
 
 def ICAngles(image, keypoints, half_patch_size, u_max):
+    """Calculate angles via Intensity Centroids
+    """
+    
     kp_position = cv.KeyPoint_convert(keypoints)
     ptsize = len(kp_position)
     
@@ -65,19 +62,12 @@ def ICAngles(image, keypoints, half_patch_size, u_max):
         keypoints[ptidx].angle = math.atan2(float(m_01), float(m_10))
 
 def retain_best(keypoints, n_point):
-    best_keypoint = []
-    insetSort(keypoints)
+    keypoints.sort(key=lambda kp: kp.response)
+
     if (n_point >= 0 and len(keypoints) > n_point):
-        if (n_point == 0):
-            best_keypoints = []
-            return
-        for idx in range(n_point):
-            best_keypoint.append(keypoints[idx])
-        keypoints = []
+        keypoints = keypoints[:n_point]
 
-    keypoints = best_keypoint
     return keypoints
-
 
 
 def ofast(image, n_point = 10):
@@ -90,7 +80,7 @@ def ofast(image, n_point = 10):
 
     fast = cv.FastFeatureDetector_create(20, True, cv.FAST_FEATURE_DETECTOR_TYPE_9_16)
 
-    pyramid(img, py_images)
+    get_pyramid(img, py_images)
 
     for img_level in py_images:
         kp = fast.detect(img_level, None)
@@ -105,18 +95,13 @@ def ofast(image, n_point = 10):
 
         u_max = umax(3)
         ICAngles(gray, kp, 3, u_max)
-
-        img2 = cv.drawKeypoints(img, kp, None, color=(255,0,0))
-        cv.imwrite('kp.png',img2)
-
         kp = retain_best(kp, n_point)
 
-        img3 = cv.drawKeypoints(img, kp, None, color=(255,0,0))
-        cv.imwrite('best_kp.png',img3)
-
-        py_kp.append(kp)
-        
+        py_kp.append(kp)        
         py_level = py_level + 1
     
+    return py_kp, py_images
+    
 
-ofast('elhest.jpg', 1000)
+
+

@@ -1,0 +1,6 @@
+numpy>=1.18.1
+opencv-contrib-python>=4.2
+yapf>=0.29
+flake8>=3.7.9
+milc==1.0.3
+matplotlib>=3.2.1
