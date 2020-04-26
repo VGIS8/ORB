@@ -1,14 +1,25 @@
 import cv2 as cv
+import numpy as np
 
 from ofast import ofast
 from rbrief import rbrief
 
-features, pyramid = ofast('elhest.jpg', 500)
 
-grey_pyramid = []
-for layer in pyramid:
-    grey_pyramid.append(cv.cvtColor(layer, cv.COLOR_BGR2GRAY))
+features, pyramid = ofast('box.png', 500)
+features2, pyramid2 = ofast('box_in_scene.png', 500)
 
-descriptors = rbrief(features, grey_pyramid)
 ofast_img = cv.drawKeypoints(pyramid[0], features[0], None, color=(255,0,0))
-cv.imwrite('best_kp.png', ofast_img)
+#cv.imshow('oFAST', ofast_img)
+cv.imwrite('test.png', ofast_img)
+
+des1 = rbrief(features, pyramid)
+des2 = rbrief(features2, pyramid2)
+
+bf = cv.BFMatcher(cv.NORM_HAMMING, crossCheck=True)
+
+matches = bf.match(des1[0], des2[0])
+matches = sorted(matches, key = lambda x:x.distance)
+
+match_img = cv.drawMatches(pyramid[0],features[0],pyramid2[0],features2[0],matches[:10],None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+cv.imwrite("matches.png", match_img)
