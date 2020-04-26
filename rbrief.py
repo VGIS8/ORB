@@ -57,5 +57,5 @@ def get_value(test, point, theta_trig, center, img):
     try:
         return img[center[0] + iy, center[1] + ix]
     except IndexError:
-        print(f"ix,iy: ({ix},{iy})")
+        print(f"ix,iy: ({ix},{iy})\trotate_C: {center[0]+iy, center[1]+ix}\timg{img.shape}")
         return 0

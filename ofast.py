@@ -84,12 +84,27 @@ def ofast(image, n_point = 10):
 
     for img_level in py_images:
         kp = fast.detect(img_level, None)
+
         harris = cv.cornerHarris(img_level, 2, 3, 0.04)
 
-        kp_position = cv.KeyPoint_convert(kp)
+        
         u_max = umax(3)
         ICAngles(img_level, kp, 3, u_max)
+
+        # Remove points close to the edge of the image
+        edge_guard = 50
+        for p in kp:
+            if     p.pt[0] < edge_guard \
+                or p.pt[1] < edge_guard \
+                or p.pt[0]+edge_guard > img_level.shape[1] \
+                or p.pt[1]+edge_guard > img_level.shape[0]:
+                del p
+
+        kp_position = cv.KeyPoint_convert(kp)
+        
         for position in range(len(kp_position)):
+            
+
             kp[position].response = harris.item((int(kp_position[position,1]), int(kp_position[position,0])))
             kp[position].octave = py_level
             kp[position].pt = (kp_position[position,0] * (py_level+1), kp_position[position,1] * (py_level+1))
