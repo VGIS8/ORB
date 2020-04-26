@@ -59,7 +59,7 @@ def ICAngles(image, keypoints, half_patch_size, u_max):
                 m_10 = m_10 + u * (val_plus + val_minus)
             m_01 = m_01 + v * v_sum
         
-        keypoints[ptidx].angle = math.degrees(math.atan2(float(m_01), float(m_10)))
+        keypoints[ptidx].angle = math.atan2(float(m_01), float(m_10))
 
 def retain_best(keypoints, n_point):
     keypoints.sort(key=lambda kp: kp.response)
@@ -87,18 +87,21 @@ def ofast(image, n_point = 10):
         harris = cv.cornerHarris(img_level, 2, 3, 0.04)
 
         kp_position = cv.KeyPoint_convert(kp)
+        u_max = umax(3)
+        ICAngles(img_level, kp, 3, u_max)
         for position in range(len(kp_position)):
 
             kp[position].response = harris.item((int(kp_position[position,1]), int(kp_position[position,0])))
             kp[position].octave = py_level
+            kp[position].pt = (kp_position[position,0] * (py_level+1), kp_position[position,1] * (py_level+1))
 
-        u_max = umax(3)
-        ICAngles(img_level, kp, 3, u_max)
         kp = retain_best(kp, n_point)
 
-        py_kp.append(kp)        
-        py_level = py_level + 1
+        py_kp += kp        
+        py_level += 1
     
+    py_kp = retain_best(py_kp, n_point)
+
     return py_kp, py_images
     
 
