@@ -90,7 +90,6 @@ def ofast(image, n_point = 10):
         u_max = umax(3)
         ICAngles(img_level, kp, 3, u_max)
         for position in range(len(kp_position)):
-
             kp[position].response = harris.item((int(kp_position[position,1]), int(kp_position[position,0])))
             kp[position].octave = py_level
             kp[position].pt = (kp_position[position,0] * (py_level+1), kp_position[position,1] * (py_level+1))
